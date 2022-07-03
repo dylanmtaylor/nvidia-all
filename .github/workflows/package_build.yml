@@ -1,0 +1,35 @@
+name: Package Builds
+
+on: [push, pull_request]
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    strategy:
+      matrix:
+        branch: ['regular', 'vulkandev']
+        dkms: ['dkms', 'non-dkms']
+    steps:
+      - uses: actions/checkout@v3
+
+
+      - name: build
+        run: |
+          export _driver_version="latest"
+          export _driver_branch="{{ matrix.branch }}"
+          if [[ "{{ matrix.dkms }}" == "dkms" ]]; then
+              _dkms="true"
+          else
+              _dkms="false"
+          fi
+          export _dkms
+          makepkg -s
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Latest Nvidia Driver {{ matrix.branch }} branch, {{ matrix.dkms }}
+          path: |
+            '*.pkg*'
