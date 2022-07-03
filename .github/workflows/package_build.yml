@@ -30,6 +30,7 @@ jobs:
               _dkms="false"
           fi
           export _dkms
+          chown -R builduser:builduser .
           sudo -u builduser bash -c 'makepkg -s'
 
       - uses: actions/upload-artifact@v3
