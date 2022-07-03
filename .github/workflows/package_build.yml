@@ -18,6 +18,10 @@ jobs:
 
       - name: build
         run: |
+          pacman -S --needed --noconfirm sudo # Install sudo
+          useradd builduser -m # Create the builduser
+          passwd -d builduser # Delete the buildusers password
+          printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers # Allow the builduser passwordless sudo
           export _driver_version="latest"
           export _driver_branch="{{ matrix.branch }}"
           if [[ "{{ matrix.dkms }}" == "dkms" ]]; then
@@ -26,7 +30,7 @@ jobs:
               _dkms="false"
           fi
           export _dkms
-          makepkg -s
+          sudo -u builduser bash -c 'makepkg -s'
 
       - uses: actions/upload-artifact@v3
         with:
