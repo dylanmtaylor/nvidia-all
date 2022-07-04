@@ -12,6 +12,7 @@ jobs:
       matrix:
         branch: ['regular', 'vulkandev']
         dkms: ['dkms', 'non-dkms']
+        open: ['open-source', 'proprietary']
     steps:
       - uses: actions/checkout@v3
 
@@ -29,9 +30,16 @@ jobs:
           else
               _dkms="false"
           fi
+          if [[ "{{ matrix.open }}" == "open-source" ]]; then
+              _open_source_modules="true"
+          else
+              _open_source_modules="false"
+          fi
           export _dkms
+          export _open_source_modules
           chown -R builduser:builduser .
           sudo -u builduser bash -c 'makepkg -s'
+          find .
 
       - uses: actions/upload-artifact@v3
         with:
