@@ -18,7 +18,7 @@ jobs:
 
       - name: build
         run: |
-          pacman -Syu --needed --noconfirm sudo linux-headers
+          pacman -Syu --needed --noconfirm sudo linux-headers fakeroot
           useradd builduser -m # Create the builduser
           passwd -d builduser # Delete the buildusers password
           printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers # Allow the builduser passwordless sudo
