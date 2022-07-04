@@ -19,7 +19,7 @@ jobs:
 
       - name: build
         run: |
-          pacman -Syu --needed --noconfirm sudo linux-headers fakeroot
+          pacman -Syu --needed --noconfirm sudo linux-headers fakeroot binutils 
           useradd builduser -m # Create the builduser
           passwd -d builduser # Delete the buildusers password
           printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers # Allow the builduser passwordless sudo
@@ -40,6 +40,7 @@ jobs:
           chown -R builduser:builduser .
           sudo -u builduser bash -c 'makepkg -s'
           find .
+          cat options
 
       - uses: actions/upload-artifact@v3
         with:
