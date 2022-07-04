@@ -40,10 +40,9 @@ jobs:
           chown -R builduser:builduser .
           sudo -u builduser bash -c 'makepkg -s'
           find .
-          cat options
 
       - uses: actions/upload-artifact@v3
         with:
           name: Latest Nvidia Driver {{ matrix.branch }} branch, {{ matrix.dkms }}
           path: |
-            '*.pkg*'
+            './*'
