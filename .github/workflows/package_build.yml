@@ -1,0 +1,48 @@
+name: Package Builds
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    strategy:
+      matrix:
+        branch: ['regular', 'vulkandev']
+        dkms: ['dkms', 'non-dkms']
+        open: ['open-source', 'proprietary']
+    steps:
+      - uses: actions/checkout@v3
+
+
+      - name: build
+        run: |
+          pacman -Syu --needed --noconfirm sudo linux-headers fakeroot binutils 
+          useradd builduser -m # Create the builduser
+          passwd -d builduser # Delete the buildusers password
+          printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers # Allow the builduser passwordless sudo
+          export _driver_version="latest"
+          export _driver_branch="{{ matrix.branch }}"
+          if [[ "{{ matrix.dkms }}" == "dkms" ]]; then
+              _dkms="true"
+          else
+              _dkms="false"
+          fi
+          if [[ "{{ matrix.open }}" == "open-source" ]]; then
+              _open_source_modules="true"
+          else
+              _open_source_modules="false"
+          fi
+          export _dkms
+          export _open_source_modules
+          chown -R builduser:builduser .
+          sudo -u builduser bash -c 'makepkg -s'
+          find .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Latest Nvidia Driver {{ matrix.branch }} branch, {{ matrix.dkms }}
+          path: |
+            './*'
